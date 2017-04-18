@@ -13,8 +13,6 @@ import subprocess
 
 from utils import get_fps, extract_frames, extract_audio, construct_video
 
-AUDIO_DUR_CMD = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 %s'
-
 
 def main(args):
     uid = uuid.uuid1()

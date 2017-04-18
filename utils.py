@@ -1,4 +1,5 @@
 import subprocess
+AUDIO_DUR_CMD = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 %s'
 
 
 def get_fps(video_file):
