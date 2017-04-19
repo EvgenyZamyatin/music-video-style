@@ -2,7 +2,7 @@ import sys
 import os
 import pickle
 import argparse
-
+sys.path.append('../../')
 import theano
 import theano.tensor as T
 import numpy as np
