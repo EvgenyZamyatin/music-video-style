@@ -55,9 +55,10 @@ class NeuralProcessor:
     def process(self, images, audio_analyze):
         result = np.zeros_like(images)
         batches = [None] * len(self.models)
+        n = len(self.models)
         for i, a in enumerate(audio_analyze):
-            k1 = int(np.floor(a * len(self.models)))
-            k2 = int(np.ceil(a * len(self.models)))
+            k1 = int(np.floor(a * (n-1)))
+            k2 = int(np.ceil(a * (n-1)))
             if batches[k1] is None:
                 batches[k1] = []
             batches[k1].append(i)
@@ -70,7 +71,7 @@ class NeuralProcessor:
         for i, batch in tqdm(enumerate(batches), total=len(batches)):
             if batch is None: continue
             result_batch = self.models[i].magic(np.array([images[j] for j in batch]))
-            result[batch] += np.uint8(np.abs(audio_analyze[batch]*len(self.models) - i) * result_batch)
+            result[batch] += np.uint8(np.abs(audio_analyze[batch]*(n-1) - i) * result_batch)
         return result
 
 
