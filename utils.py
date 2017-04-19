@@ -1,6 +1,8 @@
 import subprocess
 import subprocess as sp
 import numpy as np
+import sys
+from scipy.misc import imread, imresize
 
 PROBE = 'ffprobe'
 # PROBE = 'avprobe'
@@ -37,8 +39,8 @@ def readAudioFile(filename):
                '-i', filename,
                '-f', 's16le',
                '-acodec', 'pcm_s16le',
-               '-ar', '44100',  # ouput will have 44100 Hz
-               '-ac', '1',  # mono (set to '2' for stereo)
+               '-ar', '44100',
+               '-ac', '1',
                '-']
     in_pipe = sp.Popen(command, stdout=sp.PIPE, stderr=sp.DEVNULL, bufsize=10 ** 8)
     completeAudioArray = np.empty(0, dtype="int16")
@@ -51,3 +53,36 @@ def readAudioFile(filename):
     in_pipe.kill()
     in_pipe.wait()
     return completeAudioArray
+
+
+def load_and_resize(img, size=None, center_crop=True):
+    try:
+        img = imread(img, mode="RGB")
+    except OSError as e:
+        print(e)
+        sys.exit(1)
+
+    if center_crop:
+        # Extract a square crop from the center of the image.
+        cur_shape = img.shape[:2]
+        shorter_side = min(cur_shape)
+        longer_side_xs = max(cur_shape) - shorter_side
+        longer_side_start = int(longer_side_xs / 2.)
+        longer_side_slice = slice(longer_side_start, longer_side_start + shorter_side)
+        if shorter_side == cur_shape[0]:
+            img = img[:, longer_side_slice, :]
+        else:
+            img = img[longer_side_slice, :, :]
+
+    if size is not None:
+        # Resize the image.
+        cur_shape = img.shape[:2]
+        shorter_side = min(cur_shape)
+        aspect = max(cur_shape) / float(shorter_side)
+        new_shorter_side = int(size / aspect)
+        if shorter_side == cur_shape[0]:
+            new_shape = (new_shorter_side, size)
+        else:
+            new_shape = (size, new_shorter_side)
+        img = imresize(img, new_shape)
+    return img

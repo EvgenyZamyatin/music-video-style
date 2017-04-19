@@ -7,6 +7,8 @@ from scipy.misc import imread, imsave, imresize
 from scipy.ndimage.filters import median_filter
 from keras.applications import VGG16, VGG19, ResNet50
 
+from utils import load_and_resize
+
 floatX = theano.config.floatX
 models_table = {
     "vgg16": VGG16,
@@ -31,40 +33,10 @@ def add_imagenet_mean(img):
 
 def load_and_preprocess_img(img, size=None, center_crop=False):
     """Load an image, and pre-process it as needed by models."""
-    try:
-        if isinstance(img, str):
-            img = imread(img, mode="RGB")
-    except OSError as e:
-        print(e)
-        sys.exit(1)
-
-    if center_crop:
-        # Extract a square crop from the center of the image.
-        cur_shape = img.shape[:2]
-        shorter_side = min(cur_shape)
-        longer_side_xs = max(cur_shape) - shorter_side
-        longer_side_start = int(longer_side_xs / 2.)
-        longer_side_slice = slice(longer_side_start, longer_side_start + shorter_side)
-        if shorter_side == cur_shape[0]:
-            img = img[:, longer_side_slice, :]
-        else:
-            img = img[longer_side_slice, :, :]
-
-    if size is not None:
-        # Resize the image.
-        cur_shape = img.shape[:2]
-        shorter_side = min(cur_shape)
-        aspect = max(cur_shape) / float(shorter_side)
-        new_shorter_side = int(size / aspect)
-        if shorter_side == cur_shape[0]:
-            new_shape = (new_shorter_side, size)
-        else:
-            new_shape = (size, new_shorter_side)
-        img = imresize(img, new_shape)
-
+    if isinstance(img, str):
+        img = load_and_resize(img, size)
     # Bring the color dimension to the front, convert to BGR.
     img = img.transpose((2, 0, 1))[::-1].astype(floatX)
-
     subtract_imagenet_mean(img)
     return img[np.newaxis, :]
 
