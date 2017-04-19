@@ -54,4 +54,4 @@ if __name__ == '__main__':
     main_arg_parser.add_argument("--no-clean", "-nc", action="store_true", help='Store .TEMP data')
 
     args = main_arg_parser.parse_args()
-    main(*args)
+    main(args)
