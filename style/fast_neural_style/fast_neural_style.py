@@ -2,6 +2,7 @@ import sys
 import os
 import pickle
 import argparse
+
 sys.path.append('.')
 import theano
 import theano.tensor as T
@@ -11,6 +12,11 @@ from tqdm import tqdm
 from style.utils import *
 from style.fast_neural_style.batch_generator import BatchGenerator
 from style.fast_neural_style.transformer_net import get_transformer_net
+
+"""python3 style/fast_neural_style/fast_neural_style.py train
+--train-dir ./data/train2014 --val-dir ./data/train2014
+--style-weight 5e-5 --output-dir outputs/wave/1 --test-image data/images/ghc.jpg
+--test-size 1024 --checkpoint --style-image data/images/wave.jpg"""
 
 main_arg_parser = argparse.ArgumentParser()
 subparsers = main_arg_parser.add_subparsers(title="subcommands", dest="subcommand")
@@ -25,7 +31,8 @@ train_arg_parser.add_argument("--batch-size", type=int, default=4)
 train_arg_parser.add_argument("--content-size", type=int, default=256)
 train_arg_parser.add_argument("--perceptual-model", type=str, choices=models_table.keys(), default="vgg19")
 train_arg_parser.add_argument("--content-layer", type=str, default="block4_conv2")
-train_arg_parser.add_argument("--style-layers", type=str, nargs="+", default=["block1_conv1", "block2_conv1", "block3_conv1", "block4_conv1", "block5_conv1"])
+train_arg_parser.add_argument("--style-layers", type=str, nargs="+",
+                              default=["block1_conv1", "block2_conv1", "block3_conv1", "block4_conv1", "block5_conv1"])
 train_arg_parser.add_argument("--content-weight", type=float, default=8.)
 train_arg_parser.add_argument("--style-weight", type=float, default=5e-4)
 train_arg_parser.add_argument("--tv-weight", type=float, default=1e-4)
@@ -38,7 +45,6 @@ train_arg_parser.add_argument("--test-image", type=str, default=None)
 train_arg_parser.add_argument("--test-size", type=int, default=None)
 train_arg_parser.add_argument("--checkpoint", action="store_true")
 train_arg_parser.add_argument("--model", type=str, default=None)
-
 
 eval_arg_parser = subparsers.add_parser("eval")
 eval_arg_parser.add_argument("--content-image", type=str, required=True)
@@ -70,7 +76,8 @@ if args.subcommand == "train":
     # Prepare batch generators.
     train_batch_generator = BatchGenerator(args.train_dir, args.train_iterations, args.batch_size, args.content_size)
     num_validations = int(np.ceil(args.train_iterations / args.val_every))
-    val_batch_generator = BatchGenerator(args.val_dir, args.val_iterations * num_validations, args.batch_size, args.content_size, args.val_iterations)
+    val_batch_generator = BatchGenerator(args.val_dir, args.val_iterations * num_validations, args.batch_size,
+                                         args.content_size, args.val_iterations)
 
     # Load the style, and (optionally) test image(s).
     style_image = load_and_preprocess_img(args.style_image, args.style_size)
@@ -80,7 +87,8 @@ if args.subcommand == "train":
     # Build perceptual model.
     try:
         perceptual_net_X = models_table[args.perceptual_model](input_tensor=X, include_top=False, weights="imagenet")
-        perceptual_net_Xtr = models_table[args.perceptual_model](input_tensor=Xtr, include_top=False, weights="imagenet")
+        perceptual_net_Xtr = models_table[args.perceptual_model](input_tensor=Xtr, include_top=False,
+                                                                 weights="imagenet")
     except KeyError:
         print("Error: Unrecognized model: {}".format(args.perceptual_model))
         sys.exit(1)
@@ -105,25 +113,32 @@ if args.subcommand == "train":
             print("Error: unrecognized style layer: {}".format(layer_name))
             sys.exit(1)
         slf_X = T.reshape(sl_X, (sl_X.shape[0], sl_X.shape[1], -1))
-        gram_X = (T.batched_tensordot(slf_X, slf_X.dimshuffle(0, 2, 1), axes=1) / T.cast(slf_X.size, floatX)) * T.cast(slf_X.shape[0], floatX)
+        gram_X = (T.batched_tensordot(slf_X, slf_X.dimshuffle(0, 2, 1), axes=1) / T.cast(slf_X.size, floatX)) * T.cast(
+            slf_X.shape[0], floatX)
         slf_Xtr = T.reshape(sl_Xtr, (sl_Xtr.shape[0], sl_Xtr.shape[1], -1))
-        gram_Xtr = (T.batched_tensordot(slf_Xtr, slf_Xtr.dimshuffle(0, 2, 1), axes=1) / T.cast(slf_Xtr.size, floatX)) * T.cast(slf_Xtr.shape[0], floatX)
+        gram_Xtr = (T.batched_tensordot(slf_Xtr, slf_Xtr.dimshuffle(0, 2, 1), axes=1) / T.cast(slf_Xtr.size,
+                                                                                               floatX)) * T.cast(
+            slf_Xtr.shape[0], floatX)
 
         get_gram_X = theano.function([], gram_X)
         style_gram = theano.shared(get_gram_X()[0, :, :])
-        style_loss = style_loss + T.sum(T.sqr(style_gram.dimshuffle("x", 0, 1) - gram_Xtr)) / T.cast(Xtr.shape[0], floatX)
+        style_loss = style_loss + T.sum(T.sqr(style_gram.dimshuffle("x", 0, 1) - gram_Xtr)) / T.cast(Xtr.shape[0],
+                                                                                                     floatX)
 
     # Build the TV loss.
-    tv_loss = (T.sum(T.abs_(Xtr[:, :, 1:, :] - Xtr[:, :, :-1, :])) + T.sum(T.abs_(Xtr[:, :, :, 1:] - Xtr[:, :, :, :-1]))) / T.cast(Xtr.shape[0], floatX)
+    tv_loss = (T.sum(T.abs_(Xtr[:, :, 1:, :] - Xtr[:, :, :-1, :])) + T.sum(
+        T.abs_(Xtr[:, :, :, 1:] - Xtr[:, :, :, :-1]))) / T.cast(Xtr.shape[0], floatX)
 
     # Build the total loss, and optimization, validation funciton.
     loss = (args.content_weight * content_loss) + (args.style_weight * style_loss) + (args.tv_weight * tv_loss)
-    optim_step = theano.function([], loss, updates=get_adam_updates(loss, transformer_net.trainable_weights, lr=args.lr, dec=args.lr_decay))
+    optim_step = theano.function([], loss, updates=get_adam_updates(loss, transformer_net.trainable_weights, lr=args.lr,
+                                                                    dec=args.lr_decay))
     get_loss = theano.function([], loss)
 
     # Run the optimization loop.
     train_losses, val_losses = [], []
-    with tqdm(desc="Training", file=sys.stdout, ncols=100, total=args.train_iterations, ascii=False, unit="iteration") as trbar:
+    with tqdm(desc="Training", file=sys.stdout, ncols=100, total=args.train_iterations, ascii=False,
+              unit="iteration") as trbar:
         for tri in range(args.train_iterations):
             X.set_value(train_batch_generator.get_batch(), borrow=True)
             loss = optim_step().item()
@@ -134,19 +149,21 @@ if args.subcommand == "train":
             if (tri + 1) % args.val_every == 0 or (tri + 1) == args.train_iterations:
                 batch_val_losses = []
                 n_val = 0
-                with tqdm(desc="Validating", file=sys.stdout, ncols=100, total=args.val_iterations, ascii=False, unit="iteration", leave=False) as valbar:
+                with tqdm(desc="Validating", file=sys.stdout, ncols=100, total=args.val_iterations, ascii=False,
+                          unit="iteration", leave=False) as valbar:
                     for vali in range(args.val_iterations):
                         X.set_value(val_batch_generator.get_batch(), borrow=True)
                         loss = get_loss().item()
                         batch_size = X.shape[0].eval()
                         n_val += batch_size
-                        batch_val_losses.append(loss*batch_size)
+                        batch_val_losses.append(loss * batch_size)
                         valbar.update(1)
                 mean_val_loss = np.sum(batch_val_losses) / n_val
                 val_losses.append(mean_val_loss)
 
                 if args.checkpoint:
-                    transformer_net.save_weights(os.path.join(args.output_dir, "model_checkpoint_{}.h5".format(tri + 1)), overwrite=True)
+                    transformer_net.save_weights(
+                        os.path.join(args.output_dir, "model_checkpoint_{}.h5".format(tri + 1)), overwrite=True)
 
                 if args.test_image is not None:
                     X.set_value(test_image, borrow=True)

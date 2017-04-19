@@ -12,12 +12,13 @@ from style.fast_neural_style.transformer_net import get_transformer_net
 from style.utils import floatX, load_and_preprocess_img, deprocess_img_and_save, preprocess_img
 from utils import load_and_resize
 
-model_pool = {}
+model_pool = {
+    'data/models/wave': None,
+}
 
 
 class NeuralModel:
-    def __init__(self, model_path, size, batch_size=5):
-        self.size = size
+    def __init__(self, model_path, batch_size=5):
         self.X = theano.shared(np.array([[[[]]]], dtype=floatX))
         weights = model_path
         transformer_net = get_transformer_net(self.X, weights)
@@ -42,13 +43,13 @@ class NeuralModel:
 
 
 class NeuralProcessor:
-    def __init__(self, model_collection_path, size):
+    def __init__(self, model_collection_path):
         model_paths = glob(model_collection_path + '/*')
         models = [None] * len(model_paths)
         for model_path in model_paths:
             assert model_path.endswith('.h5')
             n = int(os.path.basename(model_path)[:-3])
-            models[n] = NeuralModel(model_path, size)
+            models[n] = NeuralModel(model_path)
         self.models = models
 
     def process(self, images, audio_analyze):
@@ -77,6 +78,10 @@ class NeuralProcessor:
         return result
 
 
+for name in model_pool:
+    model_pool[name] = NeuralProcessor(name)
+
+
 def process(frames_dir, audio_analyze, size, neural=False, colorize=False, brightify=False):
     if neural:
         neural_process(frames_dir, audio_analyze, neural, size)
@@ -87,7 +92,10 @@ def process(frames_dir, audio_analyze, size, neural=False, colorize=False, brigh
 
 
 def neural_process(frames_dir, audio_analyze, neural, size):
-    neural_processor = NeuralProcessor(neural, size)
+    if neural not in model_pool:
+        model_pool[neural] = NeuralProcessor(neural)
+    neural_processor = model_pool[neural]
+
     frame_files = sorted(glob(frames_dir + '/*'))
     assert len(audio_analyze) == len(frame_files)
     images = []

@@ -13,6 +13,16 @@ import subprocess
 from utils import get_fps, extract_frames, extract_audio, construct_video
 
 
+def create_args(video, output, neural=False, colorize=False, brightify=False, size=1024, no_clean=False):
+    return argparse.Namespace(video=video,
+                              output=output,
+                              neural=neural,
+                              colorize=colorize,
+                              brightify=brightify,
+                              size=size,
+                              no_clean=no_clean)
+
+
 def main(args):
     uid = uuid.uuid1()
     dir_name = './.TEMP-' + str(uid)
@@ -44,4 +54,4 @@ if __name__ == '__main__':
     main_arg_parser.add_argument("--no-clean", "-nc", action="store_true", help='Store .TEMP data')
 
     args = main_arg_parser.parse_args()
-    main(args)
+    main(*args)
