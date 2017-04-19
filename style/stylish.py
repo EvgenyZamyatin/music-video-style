@@ -84,7 +84,11 @@ def colorizer(img, s_f):
 
 
 def brightifier(img, s_f):
-    return np.uint8(img * s_f)
+    img_shape = img.shape
+    img = img.reshape([len(s_f), img.shape[0] // len(s_f)] + list(img.shape[1:]))
+    img = img * s_f[:, np.newaxis, np.newaxis, np.newaxis]
+    img = img.reshape(img_shape)
+    return np.uint8(img)
 
 
 def color_process(frames_dir, audio_analyze, size=None):
@@ -102,11 +106,18 @@ def color_process(frames_dir, audio_analyze, size=None):
             imsave(frame_batch[j], img[j])
 
 
-def bright_process(frames_dir, audio_analyze):
-    assert False
-    for frame_file, f in zip(sorted(glob(frames_dir + '/*')), audio_analyze):
-        img = imread(frame_file)
-        img = brightifier(img, f)
-        imsave(frame_file, img)
+def bright_process(frames_dir, audio_analyze, size=None):
+    frame_files = sorted(glob(frames_dir + '/*'))
+    assert len(audio_analyze) == len(frame_files)
+    batch_size = 50
+    for i in tqdm(range(0, len(audio_analyze), batch_size)):
+        frame_batch = frame_files[i:i + batch_size]
+        desc_batch = audio_analyze[i:i + batch_size]
+        img = np.concatenate([load_and_resize(f, size) for f in frame_batch], axis=0)
+        img = brightifier(img, desc_batch)
+        n = len(desc_batch)
+        img = img.reshape([n, img.shape[0]//n] + list(img.shape[1:]))
+        for j in range(len(frame_batch)):
+            imsave(frame_batch[j], img[j])
 
 
