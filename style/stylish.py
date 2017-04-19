@@ -16,7 +16,7 @@ model_pool = {}
 
 
 class NeuralModel:
-    def __init__(self, model_path, size, batch_size=10):
+    def __init__(self, model_path, size, batch_size=5):
         self.size = size
         self.X = theano.shared(np.array([[[[]]]], dtype=floatX))
         weights = model_path
@@ -63,7 +63,6 @@ class NeuralProcessor:
             batches[k1].append(i)
 
             #if k1 == k2:
-            #    print('!!!')
             #    continue
             if batches[k2] is None:
                 batches[k2] = []
