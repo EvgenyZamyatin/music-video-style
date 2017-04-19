@@ -14,7 +14,7 @@ def main(args):
         '--test-size': '1024',
         '--checkpoint': '',
         '--style-image': args.style_image,
-        '--train-iter': '10000'
+        '--train-iter': '100'
     }
     for i, sw in enumerate(np.linspace(args.start, args.end, args.n)):
         params['--style-weight'] = str(sw)
