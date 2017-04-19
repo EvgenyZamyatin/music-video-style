@@ -30,7 +30,7 @@ def main(args):
 
     os.makedirs(result_dir)
     for i in range(args.n):
-        shutil.copy(args.output + '/%d' % i + '/model.h5', result_dir + '/%d.h5')
+        shutil.copy(args.output + '/' + name + '/%d' % i + '/model.h5', result_dir + '/%d.h5')
 
 
 if __name__ == '__main__':
