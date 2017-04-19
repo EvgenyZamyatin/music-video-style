@@ -17,7 +17,7 @@ def main(args):
         '--train-iter': '10000'
     }
     for i, sw in enumerate(np.linspace(args.start, args.end, args.n)):
-        params['--style-weight'] = sw
+        params['--style-weight'] = str(sw)
         output = args.output + '/%d' % i
         params['--output-dir'] = output
         if i != 0:
