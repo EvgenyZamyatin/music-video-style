@@ -27,8 +27,8 @@ def main(args):
         subprocess.call('python3 style/fast_neural_style/fast_neural_style.py train ' + ' '.join(' '.join(item) for item in params.items()),
                         shell=True)
     result_dir = './data/models/%s' % name
-
-    os.makedirs(result_dir)
+    if not os.path.exists(result_dir):
+        os.makedirs(result_dir)
     for i in range(args.n):
         shutil.copy(args.output + '/' + name + '/%d' % i + '/model.h5', result_dir + '/%d.h5')
 
