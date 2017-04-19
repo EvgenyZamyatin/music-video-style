@@ -2,7 +2,6 @@ import argparse
 import os
 from glob import glob
 
-import ffmpy
 import uuid
 
 from shutil import rmtree
