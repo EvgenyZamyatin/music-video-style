@@ -26,7 +26,7 @@ class NeuralModel:
         self.batch_size = batch_size
 
     def magic(self, image_batch):
-        image_batch = np.array([preprocess_img(i) for i in image_batch])
+        image_batch = np.concatenate([preprocess_img(i) for i in image_batch], axis=0)
         result = np.zeros_like(image_batch)
         for i in range(0, len(image_batch), self.batch_size):
             batch = image_batch[i:i+self.batch_size]
