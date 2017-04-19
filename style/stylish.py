@@ -1,6 +1,6 @@
 from glob import glob
 from time import time
-
+import os
 import numpy as np
 import colorsys
 
@@ -9,64 +9,90 @@ import theano
 from tqdm import tqdm
 
 from style.fast_neural_style.transformer_net import get_transformer_net
-from style.utils import floatX, load_and_preprocess_img, deprocess_img_and_save
+from style.utils import floatX, load_and_preprocess_img, deprocess_img_and_save, preprocess_img
 from utils import load_and_resize
 
 model_pool = {}
 
 
 class NeuralModel:
-    def __init__(self, model_path, size):
+    def __init__(self, model_path, size, batch_size=10):
         self.size = size
         self.X = theano.shared(np.array([[[[]]]], dtype=floatX))
         weights = model_path
         transformer_net = get_transformer_net(self.X, weights)
         Xtr = transformer_net.output
         self.get_Xtr = theano.function([], Xtr)
+        self.batch_size = batch_size
 
     def magic(self, image_batch):
-        inplace = False
-        if isinstance(image_batch, list) and isinstance(image_batch[0], str):
-            inplace = True
-        processed = []
-        for img in image_batch:
-            img = load_and_preprocess_img(img, self.size)
-            processed.append(img)
-        processed = np.array(processed, dtype=floatX)
-        self.X.set_value(processed)
-        output_batch = self.get_Xtr()
-        if inplace:
-            for img, file in zip(output_batch, image_batch):
-                deprocess_img_and_save(img, file)
-            return
-
+        image_batch = np.array([preprocess_img(i) for i in image_batch])
+        result = np.zeros_like(image_batch)
+        for i in range(0, len(image_batch), self.batch_size):
+            batch = image_batch[i:i+self.batch_size]
+            self.X.set_value(image_batch)
+            output_batch = self.get_Xtr()
+            result[i:i+len(batch)] = output_batch
         deprocessed = []
-        for img in output_batch:
+        for img in result:
             img = deprocess_img_and_save(img)
             deprocessed.append(img)
-        deprocessed = np.array(deprocessed, dtype=deprocessed[0].dtype)
+        deprocessed = np.array(deprocessed)
         return deprocessed
 
 
-def process(frames_dir, audio_analyze, size, model=False, colorize=False, brightify=False):
-    if model:
-        neural_process(frames_dir, audio_analyze, model, size)
+class NeuralProcessor:
+    def __init__(self, model_collection_path, size):
+        model_paths = glob(model_collection_path + '/*')
+        models = [None] * len(model_paths)
+        for model_path in model_paths:
+            assert model_path.endswith('.h5')
+            n = int(os.path.basename(model_path)[:-3])
+            models[n] = NeuralModel(model_path, size)
+        self.models = models
+
+    def process(self, images, audio_analyze):
+        result = np.zeros_like(images)
+        batches = [None] * len(self.models)
+        for i, a in enumerate(audio_analyze):
+            k1 = int(np.floor(a))
+            k2 = int(np.ceil(a))
+            if batches[k1] is None:
+                batches[k1] = []
+            batches[k1].append(i)
+
+            if k1 == k2: continue
+            if batches[k2] is None:
+                batches[k2] = []
+            batches[k2].append(i)
+
+        for i, batch in tqdm(enumerate(batches)):
+            if batch is None: continue
+            result_batch = self.models[i].magic(np.array([images[j] for j in batch]))
+            result[batch] += np.uint8(np.abs(audio_analyze[batch] - i) * result_batch)
+        return result
+
+
+def process(frames_dir, audio_analyze, size, neural=False, colorize=False, brightify=False):
+    if neural:
+        neural_process(frames_dir, audio_analyze, neural, size)
     if colorize:
         color_process(frames_dir, audio_analyze, size)
     if brightify:
         bright_process(frames_dir, audio_analyze)
 
 
-def neural_process(frames_dir, desc, model_file, size):
-    if model_file not in model_pool:
-        model_pool[model_file] = NeuralModel(model_file, size)
-    model = model_pool[model_file]
+def neural_process(frames_dir, audio_analyze, neural, size):
+    neural_processor = NeuralProcessor(neural, size)
     frame_files = sorted(glob(frames_dir + '/*'))
-    assert len(desc) == len(frame_files)
-    for i in range(0, len(desc), 10):
-        frame_batch = frame_files[i:i + 10]
-        desc_batch = desc[i:i + 10]
-        model.magic(frame_batch)
+    assert len(audio_analyze) == len(frame_files)
+    images = []
+    for frame_file in frame_files:
+        images.append(load_and_resize(frame_file, size))
+    images = np.array(images)
+    result = neural_processor.process(images, audio_analyze)
+    for img, file in zip(result, frame_files):
+        imsave(file, img)
 
 
 def colorizer(img, s_f):
@@ -75,7 +101,7 @@ def colorizer(img, s_f):
     r, g, b = np.rollaxis(img, axis=-1)
     h, s, v = rgb_to_hsv(r, g, b)
     s_shape = s.shape
-    s = s.reshape([len(s_f), s.shape[0]//len(s_f)] + list(s.shape[1:]))
+    s = s.reshape([len(s_f), s.shape[0] // len(s_f)] + list(s.shape[1:]))
     s *= s_f[:, np.newaxis, np.newaxis]
     s = s.reshape(s_shape)
     r, g, b = hsv_to_rgb(h, s, v)
@@ -116,8 +142,6 @@ def bright_process(frames_dir, audio_analyze, size=None):
         img = np.concatenate([load_and_resize(f, size) for f in frame_batch], axis=0)
         img = brightifier(img, desc_batch)
         n = len(desc_batch)
-        img = img.reshape([n, img.shape[0]//n] + list(img.shape[1:]))
+        img = img.reshape([n, img.shape[0] // n] + list(img.shape[1:]))
         for j in range(len(frame_batch)):
             imsave(frame_batch[j], img[j])
-
-

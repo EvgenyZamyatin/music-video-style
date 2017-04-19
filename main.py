@@ -35,7 +35,8 @@ def main(args):
 if __name__ == '__main__':
     main_arg_parser = argparse.ArgumentParser()
     main_arg_parser.add_argument("--video", "-v", type=str, required=True, help='Path to video file')
-    main_arg_parser.add_argument("--model", "-m", type=str, default=False, help='Path to neural model file(def: False)')
+    main_arg_parser.add_argument("--neural", "-n", type=str, default=False,
+                                 help='Path to neural models collection(def: False)')
     main_arg_parser.add_argument("--colorize", "-cl", action="store_true", help='Use colorization')
     main_arg_parser.add_argument("--brightify", "-br", action="store_true", help='Use brightness')
     main_arg_parser.add_argument("--size", "-s", type=int, default=1024, help='Result video resolution')
