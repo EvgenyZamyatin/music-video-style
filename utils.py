@@ -2,10 +2,10 @@ import subprocess
 import subprocess as sp
 import numpy as np
 
-# PROBE = 'ffprobe'
-PROBE = 'avprobe'
-# FFMPEG = 'ffmpeg'
-FFMPEG = 'avconv'
+PROBE = 'ffprobe'
+# PROBE = 'avprobe'
+FFMPEG = 'ffmpeg'
+# FFMPEG = 'avconv'
 
 AUDIO_DUR_CMD = '%s -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 %s'
 
