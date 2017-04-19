@@ -1,6 +1,9 @@
 import subprocess
+import subprocess as sp
+import numpy as np
+
 # PROBE = 'ffprobe'
-PROVE = 'avprobe'
+PROBE = 'avprobe'
 # FFMPEG = 'ffmpeg'
 FFMPEG = 'avconv'
 
@@ -27,3 +30,24 @@ def construct_video(frames_dir, audio_file, fps, out_file):
                     '-pix_fmt yuv420p -c:a aac -strict experimental -shortest %s' % (
                         FFMPEG, frames_dir, audio_file, fps, out_file),
                     shell=True)
+
+
+def readAudioFile(filename):
+    command = [FFMPEG,
+               '-i', filename,
+               '-f', 's16le',
+               '-acodec', 'pcm_s16le',
+               '-ar', '44100',  # ouput will have 44100 Hz
+               '-ac', '1',  # mono (set to '2' for stereo)
+               '-']
+    in_pipe = sp.Popen(command, stdout=sp.PIPE, stderr=sp.DEVNULL, bufsize=10 ** 8)
+    completeAudioArray = np.empty(0, dtype="int16")
+    while True:
+        raw_audio = in_pipe.stdout.read(88200 * 4)
+        if len(raw_audio) == 0:
+            break
+        audio_array = np.fromstring(raw_audio, dtype="int16")
+        completeAudioArray = np.append(completeAudioArray, audio_array)
+    in_pipe.kill()
+    in_pipe.wait()
+    return completeAudioArray
