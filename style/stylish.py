@@ -30,7 +30,6 @@ class NeuralModel:
         result = np.zeros_like(image_batch)
         for i in range(0, len(image_batch), self.batch_size):
             batch = image_batch[i:i+self.batch_size]
-            print(batch.shape)
             self.X.set_value(batch)
             output_batch = self.get_Xtr()
             result[i:i+len(batch)] = output_batch

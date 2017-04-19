@@ -49,7 +49,8 @@ def preprocess_img(img):
 
 def deprocess_img_and_save(img, filename=None):
     """Undo pre-processing on an image, and save it."""
-    img = img[0, :, :, :]
+    if len(img.shape) == 4:
+        img = img[0, :, :, :]
     add_imagenet_mean(img)
     img = img[::-1].transpose((1, 2, 0))
     img = np.clip(img, 0, 255).astype(np.uint8)
