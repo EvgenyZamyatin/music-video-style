@@ -10,7 +10,7 @@ import logging
 import sys
 
 URL_TELEGRAM = "https://api.telegram.org/bot"
-TOKEN = "284065983:AAGiyvMiLJRg0Q-g8ke-nZmG0T-rjEF3j_A"
+TOKEN = "376252610:AAHQdNgobYzUjAjIGijmKsseCvTqHXjIj4Y"
 BOT_NAME = "VideoST_bot"
 
 
@@ -79,7 +79,7 @@ def dump_users(*_):
 
     dump("dump users")
     with open("users.txt", "wb") as u:
-        # pickle.dump(existing_chats, u)
+        pickle.dump(existing_chats, u)
         pickle.dump(last_update_id, u)
         pickle.dump(g_chat_id, u)
 
@@ -169,7 +169,7 @@ if __name__ == "__main__":
                         dump("command, chat_id: {} {}".format(text, g_chat_id))
                         commands[text](g_chat_id)
 
-            time.sleep(100)
+            time.sleep(1)
 
             cur = datetime.datetime.now()
 
