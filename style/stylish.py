@@ -75,7 +75,7 @@ def colorizer(img, s_f):
     r, g, b = np.rollaxis(img, axis=-1)
     h, s, v = rgb_to_hsv(r, g, b)
     s_shape = s.shape
-    s = s.reshape((len(s_f), s.shape[0]//len(s_f), *s.shape[1:]))
+    s = s.reshape([len(s_f), s.shape[0]//len(s_f)] + list(s.shape[1:]))
     s *= s_f[:, np.newaxis, np.newaxis]
     s = s.reshape(s_shape)
     r, g, b = hsv_to_rgb(h, s, v)
