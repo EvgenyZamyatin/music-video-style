@@ -22,7 +22,7 @@ def main(args):
         params['--output-dir'] = output
         if i != 0:
             params['--model'] = args.output + '/%d' % (i-1) + '/model.h5'
-        subprocess.call('python3 fast_neural_style/fast_neural_style.py train ' + ' '.join(' '.join(item) for item in params.items()),
+        subprocess.call('python3 style/fast_neural_style/fast_neural_style.py train ' + ' '.join(' '.join(item) for item in params.items()),
                         shell=True)
     result_dir = './data/models/%s' % args.style_image
 
