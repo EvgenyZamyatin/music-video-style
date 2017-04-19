@@ -62,11 +62,13 @@ class NeuralProcessor:
                 batches[k1] = []
             batches[k1].append(i)
 
-            if k1 == k2: continue
+            if k1 == k2:
+                print('!!!')
+                continue
             if batches[k2] is None:
                 batches[k2] = []
             batches[k2].append(i)
-
+        exit(0)
         for i, batch in tqdm(enumerate(batches), total=len(batches)):
             if batch is None: continue
             result_batch = self.models[i].magic(np.array([images[j] for j in batch]))
