@@ -1,3 +1,5 @@
 .idea
 __pycache__
 .TEMP*
+*.mp4
+*.avi
