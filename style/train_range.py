@@ -25,7 +25,7 @@ def main(args):
         subprocess.call('python3 fast_neural_style/fast_neural_style.py train ' + ' '.join(' '.join(item) for item in params.items()),
                         shell=True)
     result_dir = './data/models/%s' % args.style_image
-    
+
     os.makedirs(result_dir)
     for i in range(args.n):
         shutil.copy(args.output + '/%d' % i + '/model.h5', result_dir + '/%d.h5')
@@ -40,4 +40,4 @@ if __name__ == '__main__':
     main_arg_parser.add_argument("--n", type=int, required=True, help='Count')
 
     args = main_arg_parser.parse_args()
-    main(*args)
+    main(args)
