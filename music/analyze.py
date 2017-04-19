@@ -1,16 +1,6 @@
-
-import colorsys
-import sys, io, os
-from scipy.misc import imread, imsave, imresize
-from PyQt4 import QtCore, QtGui, uic
-from PyQt4.QtGui import QPainter, QColor
-from os.path import expanduser
 import subprocess as sp
+
 import numpy as np
-import urllib
-from PIL import Image, ImageDraw, ImageFont
-import matplotlib.pyplot as plt
-from tqdm import tqdm
 from scipy.signal import savgol_filter
 
 
