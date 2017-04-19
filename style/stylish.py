@@ -70,7 +70,7 @@ class NeuralProcessor:
         for i, batch in tqdm(enumerate(batches), total=len(batches)):
             if batch is None: continue
             result_batch = self.models[i].magic(np.array([images[j] for j in batch]))
-            result[batch] += np.uint8(np.abs(audio_analyze[batch]*(n-1) - i) * result_batch)
+            result[batch] += np.uint8(np.abs(audio_analyze[batch]*(n-1) - i)[:, np.newaxis, np.newaxis, np.newaxis] * result_batch)
         return result
 
 
