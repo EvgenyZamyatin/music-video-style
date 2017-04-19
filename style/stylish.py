@@ -99,9 +99,9 @@ def color_process(frames_dir, audio_analyze, size=None):
         frame_batch = frame_files[i:i + batch_size]
         desc_batch = audio_analyze[i:i + batch_size]
         img = np.concatenate([load_and_resize(f, size) for f in frame_batch], axis=0)
-        img_shape = img.shape
         img = colorizer(img, desc_batch)
-        img = img.reshape(img_shape)
+        n = len(desc_batch)
+        img = img.reshape([n, img.shape[0] // n] + list(img.shape[1:]))
         for j in range(len(frame_batch)):
             imsave(frame_batch[j], img[j])
 
