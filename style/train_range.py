@@ -17,14 +17,15 @@ def main(args):
         '--train-iter': '100'
     }
     for i, sw in enumerate(np.linspace(args.start, args.end, args.n)):
+        break
         params['--style-weight'] = str(sw)
-        output = args.output + '/%d' % i
+        output = args.output + os.path.basename(args.style_image) + '/%d' % i
         params['--output-dir'] = output
         if i != 0:
             params['--model'] = args.output + '/%d' % (i-1) + '/model.h5'
         subprocess.call('python3 style/fast_neural_style/fast_neural_style.py train ' + ' '.join(' '.join(item) for item in params.items()),
                         shell=True)
-    result_dir = './data/models/%s' % args.style_image
+    result_dir = './data/models/%s' % os.path.basename(args.style_image)
 
     os.makedirs(result_dir)
     for i in range(args.n):
