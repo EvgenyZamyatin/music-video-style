@@ -30,7 +30,8 @@ class NeuralModel:
         result = np.zeros_like(image_batch)
         for i in range(0, len(image_batch), self.batch_size):
             batch = image_batch[i:i+self.batch_size]
-            self.X.set_value(image_batch)
+            print(batch.shape)
+            self.X.set_value(batch)
             output_batch = self.get_Xtr()
             result[i:i+len(batch)] = output_batch
         deprocessed = []
@@ -66,7 +67,7 @@ class NeuralProcessor:
                 batches[k2] = []
             batches[k2].append(i)
 
-        for i, batch in tqdm(enumerate(batches)):
+        for i, batch in tqdm(enumerate(batches), total=len(batches)):
             if batch is None: continue
             result_batch = self.models[i].magic(np.array([images[j] for j in batch]))
             result[batch] += np.uint8(np.abs(audio_analyze[batch] - i) * result_batch)
