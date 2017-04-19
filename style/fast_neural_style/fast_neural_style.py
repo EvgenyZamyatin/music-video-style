@@ -37,6 +37,8 @@ train_arg_parser.add_argument("--output-dir", type=str, required=True)
 train_arg_parser.add_argument("--test-image", type=str, default=None)
 train_arg_parser.add_argument("--test-size", type=int, default=None)
 train_arg_parser.add_argument("--checkpoint", action="store_true")
+train_arg_parser.add_argument("--model", type=str, default=None)
+
 
 eval_arg_parser = subparsers.add_parser("eval")
 eval_arg_parser.add_argument("--content-image", type=str, required=True)
@@ -52,7 +54,7 @@ if args.subcommand is None:
 
 # Build transformer model.
 X = theano.shared(np.array([[[[]]]], dtype=floatX))
-weights = None if args.subcommand == "train" else args.model
+weights = args.model
 transformer_net = get_transformer_net(X, weights)
 Xtr = transformer_net.output
 get_Xtr = theano.function([], Xtr)
