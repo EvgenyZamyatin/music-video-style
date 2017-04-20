@@ -20,7 +20,7 @@ model_pool = {
 
 
 class NeuralModel:
-    def __init__(self, model_path, batch_size=5):
+    def __init__(self, model_path, batch_size=1):
         self.identity = False
         if model_path is None:
             self.identity = True
