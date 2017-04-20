@@ -203,6 +203,8 @@ def handle_text(text, chat_id):
         current_style = 'wave'
     elif text == 'stained-glass':
         current_style = 'stained-glass'
+    elif text == 'flames':
+        current_style = 'flames'
 
 
 def handle_doc(document, chat_id):
