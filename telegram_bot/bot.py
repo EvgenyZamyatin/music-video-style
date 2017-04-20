@@ -11,6 +11,9 @@ import sys
 import urllib.request
 import os
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from main import main_with_list_args as make_style
+
 URL_TELEGRAM = "https://api.telegram.org/"
 URL_TELEGRAM_BOT = URL_TELEGRAM + "bot"
 TOKEN = "376252610:AAHQdNgobYzUjAjIGijmKsseCvTqHXjIj4Y"
@@ -62,12 +65,13 @@ def get_file(chat_id, file_id):
             res_path = DOWNLOAD_PATH + str(chat_id) + video_extension
 
             dump("start downloading video from url: {}; to: {}".format(url_for_download_video, res_path))
+            send_message(chat_id, "start downloading video: 10%")
 
             urllib.request.urlretrieve(url_for_download_video, res_path)
 
             dump("download completed")
-
-            send_video(chat_id, res_path)
+            send_message(chat_id, "the download completed: 30%")
+            send_message(chat_id, "start creating stylish video: 35%")
 
     return res_path
 
@@ -187,19 +191,32 @@ def shut_down(chat_id, *_):
     proceed = False
 
 
-def handle_text(text):
+def handle_text(text, chat_id):
     if text in commands:
-        dump("command, chat_id: {} {}".format(text, g_chat_id))
-        commands[text](g_chat_id)
+        dump("command, chat_id: {} {}".format(text, chat_id))
+        commands[text](chat_id)
 
 
-def handle_doc(document):
+def handle_doc(document, chat_id):
     dump("get doc: {}".format(document))
 
-    res_path = get_file(g_chat_id, document["file_id"])
+    res_path = get_file(chat_id, document["file_id"])
 
     if res_path is not None:
-        send_video(g_chat_id, res_path)
+        base_name, extension = os.path.splitext(res_path)
+        output_path = base_name + "_out" + extension
+
+        args = ["--video=" + res_path,
+                "--brightify",
+                "--output=" + output_path]
+
+        dump("make_style")
+        make_style(args)
+
+        send_message(chat_id, "stylish video was created: 70%")
+        dump("stylish video was created")
+
+        send_video(chat_id, output_path)
 
 
 proceed = True
@@ -237,7 +254,7 @@ if __name__ == "__main__":
 
                 for attr, handler in attributes_for_request.items():
                     if attr in msg:
-                        handler(msg[attr])
+                        handler(msg[attr], g_chat_id)
                         break
 
             time.sleep(1)

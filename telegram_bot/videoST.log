@@ -1,24 +1,21 @@
-08:43:46 (MainThread) load_users
-08:43:46 (MainThread) {97608416}
-08:43:52 (MainThread) got entry: {'message': {'message_id': 36, 'chat': {'id': 97608416, 'first_name': 'Eugene', 'last_name': 'Nemchenko', 'type': 'private', 'username': 'eugene536'}, 'video': {'duration': 3, 'file_size': 1342891, 'file_id': 'BAADAgADNgAD7BXBSwTRyWvi4M5TAg', 'height': 720, 'width': 1280, 'thumb': {'file_id': 'AAQCABM0cbcNAAS-jkADLffOL8UaAAIC', 'file_size': 1491, 'height': 51, 'width': 90}}, 'date': 1492644633, 'from': {'id': 97608416, 'first_name': 'Eugene', 'last_name': 'Nemchenko', 'username': 'eugene536'}}, 'update_id': 802401567}
-08:43:52 (MainThread) get doc: {'duration': 3, 'file_size': 1342891, 'file_id': 'BAADAgADNgAD7BXBSwTRyWvi4M5TAg', 'height': 720, 'width': 1280, 'thumb': {'file_id': 'AAQCABM0cbcNAAS-jkADLffOL8UaAAIC', 'file_size': 1491, 'height': 51, 'width': 90}}
-08:43:52 (MainThread) get_file from chat_id = 97608416
-08:43:53 (MainThread) got responce: {}
-08:43:53 (MainThread) start downloading video from url: https://api.telegram.org/file/bot376252610:AAHQdNgobYzUjAjIGijmKsseCvTqHXjIj4Y/videos/file_8.mp4; to: /home/eugene/university/programming/ai_hackathon/music-video-style/telegram_bot/downloads/97608416.mp4
-08:44:11 (MainThread) download completed
-08:44:11 (MainThread) start sending vide to chat_id: 97608416, with path: /home/eugene/university/programming/ai_hackathon/music-video-style/telegram_bot/downloads/97608416.mp4
-08:44:11 (MainThread) dump users
-08:44:11 (MainThread) [Errno 2] No such file or directory: '/home/eugene/university/programming/ai_hackathon/music-video-style/telegram_bot/downloads/97608416.mp4'
-08:44:51 (MainThread) got entry: {'message': {'message_id': 51, 'chat': {'id': 97608416, 'first_name': 'Eugene', 'last_name': 'Nemchenko', 'type': 'private', 'username': 'eugene536'}, 'video': {'duration': 3, 'file_size': 1342891, 'file_id': 'BAADAgADBgADqvrBS3j_7ViTdN-zAg', 'height': 720, 'width': 1280, 'thumb': {'file_id': 'AAQCABM0cbcNAAS-jkADLffOL8UaAAIC', 'file_size': 1491, 'height': 51, 'width': 90}}, 'date': 1492667090, 'from': {'id': 97608416, 'first_name': 'Eugene', 'last_name': 'Nemchenko', 'username': 'eugene536'}}, 'update_id': 802401568}
-08:44:51 (MainThread) get doc: {'duration': 3, 'file_size': 1342891, 'file_id': 'BAADAgADBgADqvrBS3j_7ViTdN-zAg', 'height': 720, 'width': 1280, 'thumb': {'file_id': 'AAQCABM0cbcNAAS-jkADLffOL8UaAAIC', 'file_size': 1491, 'height': 51, 'width': 90}}
-08:44:51 (MainThread) get_file from chat_id = 97608416
-08:44:51 (MainThread) got responce: {}
-08:44:51 (MainThread) start downloading video from url: https://api.telegram.org/file/bot376252610:AAHQdNgobYzUjAjIGijmKsseCvTqHXjIj4Y/videos/file_9.mp4; to: /home/eugene/university/programming/ai_hackathon/music-video-style/telegram_bot/downloads/97608416.mp4
-08:45:04 (MainThread) download completed
-08:45:04 (MainThread) start sending vide to chat_id: 97608416, with path: /home/eugene/university/programming/ai_hackathon/music-video-style/telegram_bot/downloads/97608416.mp4
-08:45:51 (MainThread) video was sent: {}
-08:45:51 (MainThread) send to chat_id = 97608416, text = Krasava
-08:45:52 (MainThread) SEND: {"ok":true,"result":{"message_id":53,"from":{"id":376252610,"first_name":"Video-Style-Transfer","username":"VideoST_bot"},"chat":{"id":97608416,"first_name":"Eugene","last_name":"Nemchenko","username":"eugene536","type":"private"},"date":1492667152,"text":"Krasava"}}
-08:45:53 (MainThread) dump users
-08:46:53 (MainThread) dump users
-08:47:53 (MainThread) dump users
+09:40:17 (MainThread) load_users
+09:40:17 (MainThread) {97608416}
+09:40:17 (MainThread) got entry: {'message': {'date': 1492669471, 'video': {'duration': 3, 'file_size': 1342891, 'thumb': {'height': 51, 'file_size': 1491, 'width': 90, 'file_id': 'AAQCABM0cbcNAAS-jkADLffOL8UaAAIC'}, 'height': 720, 'width': 1280, 'file_id': 'BAADAgADEQADqvrBS4ktrbFzY_2BAg'}, 'chat': {'last_name': 'Nemchenko', 'type': 'private', 'id': 97608416, 'first_name': 'Eugene', 'username': 'eugene536'}, 'from': {'last_name': 'Nemchenko', 'id': 97608416, 'first_name': 'Eugene', 'username': 'eugene536'}, 'message_id': 58}, 'update_id': 802401570}
+09:40:17 (MainThread) get doc: {'duration': 3, 'file_size': 1342891, 'thumb': {'height': 51, 'file_size': 1491, 'width': 90, 'file_id': 'AAQCABM0cbcNAAS-jkADLffOL8UaAAIC'}, 'height': 720, 'width': 1280, 'file_id': 'BAADAgADEQADqvrBS4ktrbFzY_2BAg'}
+09:40:17 (MainThread) get_file from chat_id = 97608416
+09:40:17 (MainThread) got responce: {}
+09:40:17 (MainThread) start downloading video from url: https://api.telegram.org/file/bot376252610:AAHQdNgobYzUjAjIGijmKsseCvTqHXjIj4Y/videos/file_11.mp4; to: /home/eugene/university/programming/ai_hackathon/music-video-style/telegram_bot/downloads/97608416.mp4
+09:40:17 (MainThread) send to chat_id = 97608416, text = start downloading video: 10%
+09:40:18 (MainThread) SEND: {"ok":true,"result":{"message_id":71,"from":{"id":376252610,"first_name":"Video-Style-Transfer","username":"VideoST_bot"},"chat":{"id":97608416,"first_name":"Eugene","last_name":"Nemchenko","username":"eugene536","type":"private"},"date":1492670418,"text":"start downloading video: 10%"}}
+09:40:19 (MainThread) download completed
+09:40:19 (MainThread) send to chat_id = 97608416, text = the download completed: 30%
+09:40:20 (MainThread) SEND: {"ok":true,"result":{"message_id":72,"from":{"id":376252610,"first_name":"Video-Style-Transfer","username":"VideoST_bot"},"chat":{"id":97608416,"first_name":"Eugene","last_name":"Nemchenko","username":"eugene536","type":"private"},"date":1492670420,"text":"the download completed: 30%"}}
+09:40:20 (MainThread) send to chat_id = 97608416, text = start creating stylish video: 35%
+09:40:20 (MainThread) SEND: {"ok":true,"result":{"message_id":73,"from":{"id":376252610,"first_name":"Video-Style-Transfer","username":"VideoST_bot"},"chat":{"id":97608416,"first_name":"Eugene","last_name":"Nemchenko","username":"eugene536","type":"private"},"date":1492670420,"text":"start creating stylish video: 35%"}}
+09:40:20 (MainThread) make_style
+09:40:44 (MainThread) send to chat_id = 97608416, text = stylish video was created: 70%
+09:40:44 (MainThread) SEND: {"ok":true,"result":{"message_id":74,"from":{"id":376252610,"first_name":"Video-Style-Transfer","username":"VideoST_bot"},"chat":{"id":97608416,"first_name":"Eugene","last_name":"Nemchenko","username":"eugene536","type":"private"},"date":1492670444,"text":"stylish video was created: 70%"}}
+09:40:44 (MainThread) stylish video was created
+09:40:44 (MainThread) start sending video to chat_id: 97608416, with path: /home/eugene/university/programming/ai_hackathon/music-video-style/telegram_bot/downloads/97608416_out.mp4
+09:40:45 (MainThread) video was sent: {}
+09:41:17 (MainThread) dump users
