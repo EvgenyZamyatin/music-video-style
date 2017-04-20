@@ -218,7 +218,7 @@ def handle_doc(document, chat_id):
 
         args = ["--video=" + res_path,
                 "--neural=" + "data/models/" + current_style,
-                "--size=256",
+                "--size=1024",
                 "--output=" + output_path]
 
         dump("make_style")
