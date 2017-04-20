@@ -85,7 +85,7 @@ class NeuralProcessor:
                 if audio_analyze1[j]:
                     result[j] = result_batch[t]
                 else:
-                    result[j] += np.uint8(c[:, np.newaxis, np.newaxis] * result_batch[t])
+                    result[j] += np.uint8(c[t] * result_batch[t])
         return result
 
 
