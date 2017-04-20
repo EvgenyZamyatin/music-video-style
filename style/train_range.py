@@ -18,11 +18,12 @@ def main(args):
     }
     name = os.path.basename(args.style_image)[:-4]
     for i, sw in enumerate(np.linspace(args.start, args.end, args.n)):
+        if i == 0: continue
         params['--style-weight'] = str(sw)
         output = args.output + '/' + name + '/%d' % i
         params['--output-dir'] = output
         if i != 0:
-            params['--model'] = args.output + '/%d' % (i-1) + '/model.h5'
+            params['--model'] = args.output + '/' + name + '/%d' % (i-1) + '/model.h5'
         command = 'python3 style/fast_neural_style/fast_neural_style.py train ' + ' '.join(' '.join(item) for item in params.items())
         subprocess.call(command,
                         shell=True)
