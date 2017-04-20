@@ -8,18 +8,25 @@ import datetime
 import pickle
 import logging
 import sys
+import urllib.request
+import os
 
-URL_TELEGRAM = "https://api.telegram.org/bot"
+URL_TELEGRAM = "https://api.telegram.org/"
+URL_TELEGRAM_BOT = URL_TELEGRAM + "bot"
 TOKEN = "376252610:AAHQdNgobYzUjAjIGijmKsseCvTqHXjIj4Y"
 BOT_NAME = "VideoST_bot"
+DOWNLOAD_PATH = os.getcwd() + "/downloads/"
 
 
 def create_request_url(request):
-    return URL_TELEGRAM + TOKEN + "/" + request
+    return URL_TELEGRAM_BOT + TOKEN + "/" + request
 
 
 updates_url = create_request_url("getUpdates")
-send_url = create_request_url("sendMessage")
+send_message_url = create_request_url("sendMessage")
+send_video_url = create_request_url("sendVideo")
+get_file_url = create_request_url("getFile")
+download_file_url = URL_TELEGRAM + "file/bot" + TOKEN + "/"  # + file_path
 
 
 def get_updates(offset=0):
@@ -33,10 +40,42 @@ def get_updates(offset=0):
     return json_response["result"]
 
 
-def send(chat_id, text):
+def get_file(chat_id, file_id):
+    dump("get_file from chat_id = {}".format(chat_id))
+    payload = {"file_id": file_id}
+    response = requests.post(get_file_url, json=payload)
+    json_response = json.loads(response.text)
+
+    dump("got responce: {}", json_response)
+
+    res_path = None
+
+    if "result" in json_response:
+        result = json_response["result"]
+
+        if "file_path" in result:
+            file_path = result["file_path"]
+
+            url_for_download_video = download_file_url + file_path
+
+            _, video_extension = os.path.splitext(file_path)
+            res_path = DOWNLOAD_PATH + str(chat_id) + video_extension
+
+            dump("start downloading video from url: {}; to: {}".format(url_for_download_video, res_path))
+
+            urllib.request.urlretrieve(url_for_download_video, res_path)
+
+            dump("download completed")
+
+            send_video(chat_id, res_path)
+
+    return res_path
+
+
+def send_message(chat_id, text):
     dump("send to chat_id = {}, text = {}".format(chat_id, text))
     payload = {"chat_id": chat_id, "text": text}
-    response = requests.post(send_url, json=payload)
+    response = requests.post(send_message_url, json=payload)
     json_response = json.loads(response.text)
 
     if "error_code" in json_response:
@@ -57,10 +96,21 @@ def send(chat_id, text):
         return 0
 
 
+def send_video(chat_id, path_to_video):
+    dump("start sending video to chat_id: {}, with path: {}".format(chat_id, path_to_video))
+    with open(path_to_video, 'rb') as video_file:
+        payload = {"video": video_file}
+        send_url = "{}?chat_id={}".format(send_video_url, chat_id)
+        response = requests.post(send_url, files=payload)
+        json_response = json.loads(response.text)
+
+        dump("video was sent: {}", json_response)
+
+
 def start_cmd(chat_id):
     dump("in start_cmd")
     global existing_chats
-    send(chat_id, "Hi, I can make your video better")
+    send_message(chat_id, "Hi, I can make your video better")
     existing_chats.add(chat_id)
 
 
@@ -68,7 +118,7 @@ def stop_cmd(chat_id):
     global existing_chats
 
     dump("in stop_cmd")
-    send(chat_id, "No, please :(")
+    send_message(chat_id, "No")
 
     existing_chats.remove(chat_id)
 
@@ -130,11 +180,27 @@ def shut_down(chat_id, *_):
 
     # for deleting recent shut_down request
     unused = get_updates(last_update_id)
-    send(chat_id, "shut down :(")
+    send_message(chat_id, "shut down :(")
 
     dump("shut_donw")
     dump_users()
     proceed = False
+
+
+def handle_text(text):
+    if text in commands:
+        dump("command, chat_id: {} {}".format(text, g_chat_id))
+        commands[text](g_chat_id)
+
+
+def handle_doc(document):
+    dump("get doc: {}".format(document))
+
+    res_path = get_file(g_chat_id, document["file_id"])
+
+    if res_path is not None:
+        send_video(g_chat_id, res_path)
+
 
 proceed = True
 existing_chats = set()
@@ -148,6 +214,11 @@ commands = {"/start": start_cmd,
             "/shut_down": shut_down
             }
 
+attributes_for_request = {"text": handle_text,
+                          "document": handle_doc,
+                          "video": handle_doc
+                          }
+
 if __name__ == "__main__":
     setup_logger()
     load_users()
@@ -159,15 +230,15 @@ if __name__ == "__main__":
 
             for entry in json_response:
                 msg = entry["message"]
-                if "text" in msg:
-                    dump("entry: {}".format(entry))
-                    text = msg["text"]
-                    g_chat_id = msg["chat"]["id"]
-                    last_update_id = max(last_update_id, entry["update_id"] + 1)
+                dump("got entry: {}".format(entry))
 
-                    if text in commands:
-                        dump("command, chat_id: {} {}".format(text, g_chat_id))
-                        commands[text](g_chat_id)
+                g_chat_id = msg["chat"]["id"]
+                last_update_id = max(last_update_id, entry["update_id"] + 1)
+
+                for attr, handler in attributes_for_request.items():
+                    if attr in msg:
+                        handler(msg[attr])
+                        break
 
             time.sleep(1)
 
