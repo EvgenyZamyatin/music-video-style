@@ -191,10 +191,18 @@ def shut_down(chat_id, *_):
     proceed = False
 
 
+current_style = 'wave'
+
+
 def handle_text(text, chat_id):
+    global current_style
     if text in commands:
         dump("command, chat_id: {} {}".format(text, chat_id))
         commands[text](chat_id)
+    if text == 'wave':
+        current_style = 'wave'
+    elif text == 'stained-glass':
+        current_style = 'stained-glass'
 
 
 def handle_doc(document, chat_id):
@@ -207,7 +215,8 @@ def handle_doc(document, chat_id):
         output_path = base_name + "_out" + extension
 
         args = ["--video=" + res_path,
-                "--brightify",
+                "--neural=" + "data/models/" + current_style,
+                "--size=256",
                 "--output=" + output_path]
 
         dump("make_style")
