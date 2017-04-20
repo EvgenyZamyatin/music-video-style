@@ -51,12 +51,14 @@ class NeuralModel:
 class NeuralProcessor:
     def __init__(self, model_collection_path):
         model_paths = glob(model_collection_path + '/*')
-        models = [None] * (len(model_paths) + 1)
-        models[0] = NeuralModel(None)
+        # models = [None] * (len(model_paths) + 1)
+        # models[0] = NeuralModel(None)
+
+        models = [None] * (len(model_paths))
         for model_path in model_paths:
             assert model_path.endswith('.h5')
             n = int(os.path.basename(model_path)[:-3])
-            models[n+1] = NeuralModel(model_path)
+            models[n] = NeuralModel(model_path)
         self.models = models
 
     def process(self, images, audio_analyze):
@@ -80,7 +82,8 @@ class NeuralProcessor:
         for i, batch in tqdm(enumerate(batches), total=len(batches)):
             if batch is None: continue
             result_batch = self.models[i].magic(np.array([images[j] for j in batch]))
-            c = np.abs(audio_analyze[batch]*(n-1) - i)
+            # c = np.abs(audio_analyze[batch]*(n-1) - i)
+            c = 0.5
             for t, j in enumerate(batch):
                 if audio_analyze1[j]:
                     result[j] = result_batch[t]
