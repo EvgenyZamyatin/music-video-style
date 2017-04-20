@@ -6,7 +6,7 @@ from scipy.signal import savgol_filter
 from utils import readAudioFile
 
 
-def analyze_1(audio_file, frames_count):
+def analyze(audio_file, frames_count):
     audio = readAudioFile(audio_file)
     audio = np.abs(audio)
     step = int(np.ceil(len(audio) / frames_count))
@@ -25,7 +25,7 @@ def analyze_1(audio_file, frames_count):
     return fs
 
 
-def analyze(audio_file, frames_count):
+def analyze_1(audio_file, frames_count):
     audio = readAudioFile(audio_file)
     audio = np.abs(audio)
     step = int(np.ceil(len(audio) / frames_count))
