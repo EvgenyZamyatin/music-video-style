@@ -18,8 +18,8 @@ def analyze(audio_file, frames_count):
     fs = (fs - fs.min()) / (fs.max() - fs.min())
     #plt.plot(fs)
     fs[fs < 0.8] /= 5
-    fs[fs >= 0.8] *= 2
-    fs = savgol_filter(fs, 7, 3)
+    fs[fs >= 0.8] *= 8
+    fs = savgol_filter(fs, 11, 3)
     fs = (fs - fs.min()) / (fs.max() - fs.min())
     for i in range(1, len(fs)):
         if fs[i] > fs[i - 1]: continue
@@ -99,7 +99,7 @@ def analyze_1(audio_file, frames_count):
 def main(args):
     import matplotlib.pyplot as plt
     audio_analyze = analyze(args.audio, args.frames)
-    audio_analyze_1 = analyze_2(args.audio, args.frames)
+    #audio_analyze_1 = analyze_2(args.audio, args.frames)
 
     #plt.plot(audio_analyze)
     #plt.plot(audio_analyze_1)
