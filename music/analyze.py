@@ -7,7 +7,7 @@ from utils import readAudioFile
 
 
 def analyze(audio_file, frames_count):
-    import matplotlib.pyplot as plt
+    #import matplotlib.pyplot as plt
     audio = readAudioFile(audio_file)
     audio = np.abs(audio)
     step = int(np.ceil(len(audio) / frames_count))
@@ -28,8 +28,8 @@ def analyze(audio_file, frames_count):
         if fs[i] > fs[i - 1]: continue
         fs[i] = max(fs[i], fs[i - 1] - 0.04)
     fs = (fs - fs.min()) / (fs.max() - fs.min())
-    plt.plot(fs)
-    plt.show()
+    #plt.plot(fs)
+    #plt.show()
     return fs
 
 
