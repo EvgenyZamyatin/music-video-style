@@ -6,7 +6,8 @@ from scipy.signal import savgol_filter
 from utils import readAudioFile
 
 
-def analyze(audio_file, frames_count):
+def analyze_1(audio_file, frames_count):
+    import matplotlib.pyplot as plt
     audio = readAudioFile(audio_file)
     audio = np.abs(audio)
     step = int(np.ceil(len(audio) / frames_count))
@@ -15,6 +16,7 @@ def analyze(audio_file, frames_count):
         fs.append(audio[i:i + step].mean())
     fs = np.array(fs)
     fs = (fs - fs.min()) / (fs.max() - fs.min())
+    plt.plot(fs)
     fs[fs < 0.8] /= 5
     fs[fs >= 0.8] *= 2
     fs = savgol_filter(fs, 7, 3)
@@ -22,10 +24,13 @@ def analyze(audio_file, frames_count):
     for i in range(1, len(fs)):
         if fs[i] > fs[i - 1]: continue
         fs[i] = max(fs[i], fs[i - 1] - 0.04)
+    plt.plot(fs)
+    plt.show()
     return fs
 
 
-def analyze_1(audio_file, frames_count):
+def analyze(audio_file, frames_count):
+    #import matplotlib.pyplot as plt
     audio = readAudioFile(audio_file)
     audio = np.abs(audio)
     step = int(np.ceil(len(audio) / frames_count))
@@ -38,30 +43,21 @@ def analyze_1(audio_file, frames_count):
         fs.append(np.trapz(t[4:7]))
     fs = np.array(fs)
     fs = (fs - fs.min()) / (fs.max() - fs.min())
-
-    #fs[fs < 0.7] /= 5
-    #fs[fs >= 0.7] *= 2
-    #fs = savgol_filter(fs, 7, 3)
-    #fs = savgol_filter(fs, 9, 5)
+    #plt.plot(fs)
     fs = (fs-fs.mean()) / np.sqrt(fs.var() + 1e-5)
     fs[fs < 0] = 0
-    #fs = savgol_filter(fs, 5, 3)
-    fs = (fs - fs.mean()) / np.sqrt(fs.var() + 1e-5)
-    fs[fs < 0] = 0
+    fs = savgol_filter(fs, 7, 3)
     fs = (fs - fs.min()) / (fs.max() - fs.min())
 
     for i in range(1, len(fs)):
         if fs[i] > fs[i - 1]: continue
-        fs[i] = max(fs[i], fs[i - 1] - 0.02)
+        fs[i] = max(fs[i], fs[i - 1] - 0.04)
 
-    for i in range(0, len(fs)-1):
-        if fs[i+1] < fs[i]: continue
-        fs[i+1] = min(fs[i] + 0.02, fs[i + 1])
-
-    #fs = savgol_filter(fs, 3, 1)
-    #fs = (fs - fs.mean())
-    #fs[fs < 0] = 0
     fs = (fs - fs.min()) / (fs.max() - fs.min())
+    fs = savgol_filter(fs, 5, 1)
+    fs = (fs - fs.min()) / (fs.max() - fs.min())
+    #plt.plot(fs)
+    #plt.show()
 
     return fs
 
@@ -71,9 +67,9 @@ def main(args):
     audio_analyze = analyze(args.audio, args.frames)
     audio_analyze_1 = analyze_1(args.audio, args.frames)
 
-    plt.plot(audio_analyze)
-    plt.plot(audio_analyze_1)
-    plt.show()
+    #plt.plot(audio_analyze)
+    #plt.plot(audio_analyze_1)
+    #plt.show()
 
 
 if __name__ == '__main__':
