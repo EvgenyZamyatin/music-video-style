@@ -13,9 +13,9 @@ from style.utils import floatX, load_and_preprocess_img, deprocess_img_and_save,
 from utils import load_and_resize
 
 model_pool = {
-    'data/models/wave': None,
-    'data/models/stained-glass': None,
-    'data/models/flames': None,
+    #'data/models/wave': None,
+    #'data/models/stained-glass': None,
+    #'data/models/flames': None,
 }
 
 
