@@ -54,12 +54,13 @@ class NeuralProcessor:
         model_paths = glob(model_collection_path + '/*')
         # models = [None] * (len(model_paths) + 1)
         # models[0] = NeuralModel(None)
-
+        print('%s INITIALIZATION' % model_collection_path)
         models = [None] * (len(model_paths))
         for model_path in model_paths:
             assert model_path.endswith('.h5')
             n = int(os.path.basename(model_path)[:-3])
             models[n] = NeuralModel(model_path)
+        print('DONE')
         self.models = models
 
     def process(self, images, audio_analyze):
