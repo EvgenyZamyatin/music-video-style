@@ -16,6 +16,9 @@ def main(args):
         '--style-image': args.style_image,
         '--train-iter': '10000'
     }
+    if args.content_weight is not None:
+        params['--content-weight'] = str(args.content_weight)
+
     name = os.path.basename(args.style_image)[:-4]
     for i, sw in enumerate(np.linspace(args.start, args.end, args.n)):
         params['--style-weight'] = str(sw)
@@ -40,6 +43,7 @@ if __name__ == '__main__':
     main_arg_parser.add_argument("--start", type=float, required=True, help='Start style weight')
     main_arg_parser.add_argument("--end", type=float, required=True, help='End style weight')
     main_arg_parser.add_argument("--n", type=int, required=True, help='Count')
+    main_arg_parser.add_argument("--content-weight", type=float, default=None, help='Count')
 
     args = main_arg_parser.parse_args()
     main(args)
