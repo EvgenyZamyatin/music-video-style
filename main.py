@@ -42,7 +42,7 @@ def main(args):
         rmtree(dir_name)
 
 
-if __name__ == '__main__':
+def main_with_list_args(list_args):
     main_arg_parser = argparse.ArgumentParser()
     main_arg_parser.add_argument("--video", "-v", type=str, required=True, help='Path to video file')
     main_arg_parser.add_argument("--neural", "-n", type=str, default=False,
@@ -53,5 +53,11 @@ if __name__ == '__main__':
     main_arg_parser.add_argument("--output", "-o", type=str, required=True, help='Path to output file')
     main_arg_parser.add_argument("--no-clean", "-nc", action="store_true", help='Store .TEMP data')
 
-    args = main_arg_parser.parse_args()
+    args = main_arg_parser.parse_args(list_args)
     main(args)
+
+
+if __name__ == '__main__':
+    import sys
+
+    main_with_list_args(sys.argv[1:])
