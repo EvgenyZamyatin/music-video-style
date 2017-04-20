@@ -7,7 +7,7 @@ from utils import readAudioFile
 
 
 def analyze(audio_file, frames_count):
-    #import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
     audio = readAudioFile(audio_file)
     audio = np.abs(audio)
     step = int(np.ceil(len(audio) / frames_count))
@@ -15,17 +15,21 @@ def analyze(audio_file, frames_count):
     for i in range(0, len(audio), step):
         fs.append(audio[i:i + step].mean())
     fs = np.array(fs)
-    fs = (fs - fs.min()) / (fs.max() - fs.min())
+    fs = (fs - fs.mean()) / np.sqrt(fs.var() + 1e-5)
+    fs[fs < 0] = 0
     #plt.plot(fs)
-    fs[fs < 0.8] /= 5
-    fs[fs >= 0.8] *= 8
-    fs = savgol_filter(fs, 11, 3)
-    fs = (fs - fs.min()) / (fs.max() - fs.min())
+    #fs[fs < 0.8] /= 8
+    #fs[fs >= 0.8] *= 8
+    #fs = savgol_filter(fs, 11, 3)
+    #fs = (fs - fs.mean()) / np.sqrt(fs.var() + 1e-5)
+    #fs[fs < 0] = 0
+    #plt.plot(fs)
     for i in range(1, len(fs)):
         if fs[i] > fs[i - 1]: continue
         fs[i] = max(fs[i], fs[i - 1] - 0.04)
-    #plt.plot(fs)
-    #plt.show()
+    fs = (fs - fs.min()) / (fs.max() - fs.min())
+    plt.plot(fs)
+    plt.show()
     return fs
 
 
