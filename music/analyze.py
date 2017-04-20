@@ -40,15 +40,24 @@ def analyze(audio_file, frames_count):
     fs = np.array(fs)
     fs = (fs - fs.min()) / (fs.max() - fs.min())
     #plt.plot(fs)
-    fs[fs < 0.8] /= 5
-    fs[fs >= 0.8] *= 2
+    #fs[fs < 0.8] /= 5
+    #fs[fs >= 0.8] *= 2
     fs = savgol_filter(fs, 7, 3)
     fs = (fs - fs.mean()) / np.sqrt(fs.var() + 1e-5)
     fs[fs < 0] = 0
     fs = (fs - fs.min()) / (fs.max() - fs.min())
+
+    fs = (fs - fs.mean()) / np.sqrt(fs.var() + 1e-5)
+    fs[fs < 0] = 0
+    fs = (fs - fs.min()) / (fs.max() - fs.min())
+
     for i in range(1, len(fs)):
         if fs[i] > fs[i - 1]: continue
         fs[i] = max(fs[i], fs[i - 1] - 0.02)
+    for i in range(0, len(fs)-1)[::-1]:
+        if fs[i] > fs[i + 1]: continue
+        fs[i] = max(fs[i], fs[i + 1] - 0.04)
+
     #plt.plot(fs)
     #plt.show()
     return fs
