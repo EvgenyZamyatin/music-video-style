@@ -18,6 +18,7 @@ def main(args):
     }
     name = os.path.basename(args.style_image)[:-4]
     for i, sw in enumerate(np.linspace(args.start, args.end, args.n)):
+        if i == 0: continue
         params['--style-weight'] = str(sw)
         output = args.output + '/' + name + '/%d' % i
         params['--output-dir'] = output
