@@ -19,6 +19,10 @@ model_pool = {
 
 class NeuralModel:
     def __init__(self, model_path, batch_size=5):
+        self.identity = False
+        if model_path is None:
+            self.identity = True
+            return
         self.X = theano.shared(np.array([[[[]]]], dtype=floatX))
         weights = model_path
         transformer_net = get_transformer_net(self.X, weights)
@@ -27,6 +31,8 @@ class NeuralModel:
         self.batch_size = batch_size
 
     def magic(self, image_batch):
+        if self.identity:
+            return image_batch
         image_batch = np.concatenate([preprocess_img(i) for i in image_batch], axis=0)
         result = np.zeros_like(image_batch)
         for i in range(0, len(image_batch), self.batch_size):
@@ -45,11 +51,12 @@ class NeuralModel:
 class NeuralProcessor:
     def __init__(self, model_collection_path):
         model_paths = glob(model_collection_path + '/*')
-        models = [None] * len(model_paths)
+        models = [None] * (len(model_paths) + 1)
+        models[0] = NeuralModel(None)
         for model_path in model_paths:
             assert model_path.endswith('.h5')
             n = int(os.path.basename(model_path)[:-3])
-            models[n] = NeuralModel(model_path)
+            models[n+1] = NeuralModel(model_path)
         self.models = models
 
     def process(self, images, audio_analyze):
@@ -74,7 +81,8 @@ class NeuralProcessor:
             result_batch = self.models[i].magic(np.array([images[j] for j in batch]))
             c = np.abs(audio_analyze[batch]*(n-1) - i)
             c = np.array([0.5])
-            result[batch] += np.uint8(c[:, np.newaxis, np.newaxis, np.newaxis] * result_batch)
+            # result[batch] += np.uint8(c[:, np.newaxis, np.newaxis, np.newaxis] * result_batch)
+            result[batch] = result_batch
         return result
 
 
