@@ -48,7 +48,7 @@ def analyze(audio_file, frames_count):
     fs = (fs - fs.min()) / (fs.max() - fs.min())
     for i in range(1, len(fs)):
         if fs[i] > fs[i - 1]: continue
-        fs[i] = max(fs[i], fs[i - 1] - 0.04)
+        fs[i] = max(fs[i], fs[i - 1] - 0.02)
     #plt.plot(fs)
     #plt.show()
     return fs
