@@ -83,7 +83,8 @@ class NeuralProcessor:
             if batch is None: continue
             result_batch = self.models[i].magic(np.array([images[j] for j in batch]))
             c = np.abs(audio_analyze[batch]*(n-1) - i)
-            c[:] = 0.5
+            # c[:] = 0.5
+            print(c)
             for t, j in enumerate(batch):
                 if audio_analyze1[j]:
                     result[j] = result_batch[t]
