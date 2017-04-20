@@ -81,8 +81,8 @@ class NeuralProcessor:
             result_batch = self.models[i].magic(np.array([images[j] for j in batch]))
             # c = np.abs(audio_analyze[batch]*(n-1) - i)
             c = np.array([0.5])
-            for j in batch:
-                result[j] += np.uint8(c[:, np.newaxis, np.newaxis] * result_batch[j])
+            for t, j in enumerate(batch):
+                result[j] += np.uint8(c[:, np.newaxis, np.newaxis] * result_batch[t])
         return result
 
 
