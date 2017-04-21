@@ -12,10 +12,18 @@ from style.fast_neural_style.transformer_net import get_transformer_net
 from style.utils import floatX, load_and_preprocess_img, deprocess_img_and_save, preprocess_img
 from utils import load_and_resize
 
+
+prefix_path = ""
+
+if "nemchenko" in os.getcwd():
+    prefix_path = "/home/evgeny/music-video-style/"
+
 model_pool = {
-    #'data/models/wave': None,
-    #'data/models/stained-glass': None,
-    #'data/models/flames': None,
+    prefix_path + 'data/models/wave': None,
+    prefix_path + 'data/models/stained-glass': None,
+    prefix_path + 'data/models/flames': None,
+    prefix_path + 'data/models/udnie': None,
+    prefix_path + 'data/models/cossacks': None,
 }
 
 

@@ -30,6 +30,7 @@ send_message_url = create_request_url("sendMessage")
 send_video_url = create_request_url("sendVideo")
 get_file_url = create_request_url("getFile")
 download_file_url = URL_TELEGRAM + "file/bot" + TOKEN + "/"  # + file_path
+reply_keyboard_url = create_request_url("ReplyKeyboardMarkup")
 
 
 def get_updates(offset=0):
@@ -102,6 +103,35 @@ def send_message(chat_id, text):
             dump("so sorry, response: {}".format(json_response))
 
         return 0
+
+
+def send_reply_keyboard(chat_id, buttons):
+    pass
+#     dump("send to reply_keyboard to chat_id = {}, text = {}".format(chat_id, text))
+#
+#     payload = {"chat_id": chat_id,
+#                "text": text,
+#                "parse_mode": "HTML"}
+#
+#     response = requests.post(send_message_url, json=payload)
+#     json_response = json.loads(response.text)
+#
+#     if "error_code" in json_response:
+#         dump("error SEND: {}".format(response.text))
+#
+#         try:
+#             existing_chats.remove(chat_id)
+#         except:
+#             pass
+#
+#         return -1
+#     else:
+#         dump("SEND: {}".format(response.text))
+#
+#         if not json_response["ok"]:
+#             dump("so sorry, response: {}".format(json_response))
+#
+#         return 0
 
 
 def send_video(chat_id, path_to_video):
