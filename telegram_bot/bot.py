@@ -78,7 +78,11 @@ def get_file(chat_id, file_id):
 
 def send_message(chat_id, text):
     dump("send to chat_id = {}, text = {}".format(chat_id, text))
-    payload = {"chat_id": chat_id, "text": text}
+
+    payload = {"chat_id": chat_id,
+               "text": text,
+               "parse_mode": "HTML"}
+
     response = requests.post(send_message_url, json=payload)
     json_response = json.loads(response.text)
 
@@ -208,7 +212,7 @@ def handle_text(text, chat_id):
         for pref_cmd, fun_cmd in prefix_commands.items():
             n = len(pref_cmd)
             if pref_cmd == text[:n]:
-                fun_cmd(g_chat_id, text[n + 1:], pref_cmd)
+                fun_cmd(chat_id, text[n + 1:], pref_cmd)
                 break
 
 
@@ -279,11 +283,22 @@ def handle_doc(document, chat_id):
         send_video(chat_id, output_path)
 
 
+def handle_message(msg):
+    global g_chat_id
+
+    g_chat_id = msg["chat"]["id"]
+
+    for attr, handler in attributes_for_request.items():
+        if attr in msg:
+            handler(msg[attr], g_chat_id)
+            break
+
+
 proceed = True
 existing_chats = set()
 
 # TODO: move this to config
-supported_styles = ["wave", "stained-glass", "flames"]
+supported_styles = ["wave", "stained-glass", "flames", "udnie", "cossacks"]
 video_styles = {}
 
 # TODO: move this to config
@@ -291,10 +306,10 @@ supported_sizes = ["256", "512", "1024"]
 video_sizes = {}
 
 help_user_txt = {
-    "/set_style": "Please pass one of this styles: {}; e.g. /set_style {}"
+    "/set_style": "Please pass one of this styles: {}; <b> e.g. /set_style {} </b>"
         .format(", ".join(supported_styles), supported_styles[0]),
 
-    "/set_video_size": "Please pass one of this sizes: {}; e.g. /set_video_size {}"
+    "/set_video_size": "Please pass one of this sizes: {}; <b> e.g. /set_video_size {} </b>"
         .format(", ".join(supported_sizes), supported_sizes[0])
 }
 
@@ -316,6 +331,10 @@ attributes_for_request = {"text": handle_text,
                           "video": handle_doc
                           }
 
+valid_requests = {"message": handle_message
+                  # , "inline_request": handle_inline_request
+                  }
+
 if __name__ == "__main__":
     setup_logger()
     load_users()
@@ -326,15 +345,13 @@ if __name__ == "__main__":
             json_response = get_updates(last_update_id)
 
             for entry in json_response:
-                msg = entry["message"]
                 dump("got entry: {}".format(entry))
 
-                g_chat_id = msg["chat"]["id"]
                 last_update_id = max(last_update_id, entry["update_id"] + 1)
 
-                for attr, handler in attributes_for_request.items():
-                    if attr in msg:
-                        handler(msg[attr], g_chat_id)
+                for req, handler in valid_requests.items():
+                    if req in entry:
+                        handler(entry[req])
                         break
 
             time.sleep(1)
