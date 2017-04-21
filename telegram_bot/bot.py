@@ -13,10 +13,13 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main import main_with_list_args as make_style
+# def make_style(*_):
+#     pass
 
 URL_TELEGRAM = "https://api.telegram.org/"
 URL_TELEGRAM_BOT = URL_TELEGRAM + "bot"
 TOKEN = "376252610:AAHQdNgobYzUjAjIGijmKsseCvTqHXjIj4Y"
+# TOKEN = "347354478:AAFU8is7V_KN-9IvVFBzphwgT3RCq0cBQQo"
 BOT_NAME = "VideoST_bot"
 DOWNLOAD_PATH = os.getcwd() + "/downloads/"
 
@@ -31,6 +34,7 @@ send_video_url = create_request_url("sendVideo")
 get_file_url = create_request_url("getFile")
 download_file_url = URL_TELEGRAM + "file/bot" + TOKEN + "/"  # + file_path
 reply_keyboard_url = create_request_url("ReplyKeyboardMarkup")
+edit_message_url = create_request_url("editMessageText")
 
 
 def get_updates(offset=0):
@@ -66,15 +70,17 @@ def get_file(chat_id, file_id):
             res_path = DOWNLOAD_PATH + str(chat_id) + video_extension
 
             dump("start downloading video from url: {}; to: {}".format(url_for_download_video, res_path))
-            send_message(chat_id, "start downloading video: 10%")
+            message_id = send_message(chat_id, "start downloading video: 10%")
 
             urllib.request.urlretrieve(url_for_download_video, res_path)
 
             dump("download completed")
-            send_message(chat_id, "the download completed: 30%")
-            send_message(chat_id, "start creating stylish video: 35%")
+            message_id = edit_message(chat_id, message_id, "the download completed: 30%")
+            message_id = edit_message(chat_id, message_id, "start creating stylish video: 35%")
 
-    return res_path
+            return res_path, message_id
+
+    return None
 
 
 def send_message(chat_id, text):
@@ -82,7 +88,8 @@ def send_message(chat_id, text):
 
     payload = {"chat_id": chat_id,
                "text": text,
-               "parse_mode": "HTML"}
+               "parse_mode": "HTML"
+               }
 
     response = requests.post(send_message_url, json=payload)
     json_response = json.loads(response.text)
@@ -101,12 +108,41 @@ def send_message(chat_id, text):
 
         if not json_response["ok"]:
             dump("so sorry, response: {}".format(json_response))
+            return -1
 
-        return 0
+        return json_response["result"]["message_id"]
+
+
+def edit_message(chat_id, message_id, new_text):
+    dump("edit_message to chat_id = {}, message_id = {}, new_text = {}".format(chat_id, message_id, new_text))
+
+    payload = {"chat_id": chat_id,
+               "message_id": message_id,
+               "text": new_text,
+               "parse_mode": "HTML"
+               }
+
+    response = requests.post(edit_message_url, json=payload)
+    json_response = json.loads(response.text)
+
+    if "error_code" in json_response:
+        dump("error SEND: {}".format(response.text))
+
+        return -1
+    else:
+        dump("SEND: {}".format(response.text))
+
+        if not json_response["ok"]:
+            dump("so sorry, response: {}".format(json_response))
+            return -1
+
+        return json_response["result"]["message_id"]
 
 
 def send_reply_keyboard(chat_id, buttons):
     pass
+
+
 #     dump("send to reply_keyboard to chat_id = {}, text = {}".format(chat_id, text))
 #
 #     payload = {"chat_id": chat_id,
@@ -146,8 +182,10 @@ def send_video(chat_id, path_to_video):
 
 
 def start_cmd(chat_id):
-    dump("in start_cmd")
     global existing_chats
+
+    dump("in start_cmd")
+
     send_message(chat_id, "Hi, I can make your video better")
     existing_chats.add(chat_id)
 
@@ -212,6 +250,7 @@ def setup_logger():
 
 def duplicate_commands_with_bot_name():
     global commands
+
     new_commands = {}
     for name, cmd in commands.items():
         new_commands[name + "@" + BOT_NAME] = cmd
@@ -285,7 +324,7 @@ def handle_set_video_size(chat_id, text, cmd_name):
 def handle_doc(document, chat_id):
     dump("get doc: {}".format(document))
 
-    res_path = get_file(chat_id, document["file_id"])
+    (res_path, message_id) = get_file(chat_id, document["file_id"])
 
     if res_path is not None:
         base_name, extension = os.path.splitext(res_path)
@@ -307,10 +346,12 @@ def handle_doc(document, chat_id):
         dump("args: {}".format(args))
         make_style(args)
 
-        send_message(chat_id, "stylish video was created: 70%")
+        message_id = edit_message(chat_id, message_id, "stylish video was created: 70%")
         dump("stylish video was created")
 
         send_video(chat_id, output_path)
+
+        message_id = edit_message(chat_id, message_id, "Work done: 100%")
 
 
 def handle_message(msg):
@@ -378,6 +419,7 @@ if __name__ == "__main__":
                 dump("got entry: {}".format(entry))
 
                 last_update_id = max(last_update_id, entry["update_id"] + 1)
+                dump("last_update_id = {}".format(last_update_id))
 
                 for req, handler in valid_requests.items():
                     if req in entry:
