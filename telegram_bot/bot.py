@@ -266,6 +266,7 @@ def handle_doc(document, chat_id):
                 "--output=" + output_path]
 
         dump("make_style")
+        dump("args: {}".format(args))
         make_style(args)
 
         send_message(chat_id, "stylish video was created: 70%")
