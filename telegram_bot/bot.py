@@ -136,8 +136,8 @@ def dump_users(*_):
         pickle.dump(existing_chats, u)
         pickle.dump(last_update_id, u)
         pickle.dump(g_chat_id, u)
-        pickle.dump(video_sizes)
-        pickle.dump(video_styles)
+        pickle.dump(video_sizes, u)
+        pickle.dump(video_styles, u)
 
 
 def load_users(*_):
@@ -208,11 +208,19 @@ def handle_text(text, chat_id):
         for pref_cmd, fun_cmd in prefix_commands.items():
             n = len(pref_cmd)
             if pref_cmd == text[:n]:
-                fun_cmd(g_chat_id, text[n + 1:])
+                fun_cmd(g_chat_id, text[n + 1:], pref_cmd)
                 break
 
 
-def handle_set_style(chat_id, text):
+def notify_user_unrecognized_cmd(chat_id, text, cmd_name):
+    ret_msg = help_user_txt[cmd_name]
+    if text:
+        ret_msg = "unrecognized value: " + text + "; " + ret_msg
+
+    send_message(chat_id, ret_msg)
+
+
+def handle_set_style(chat_id, text, cmd_name):
     global video_styles
 
     dump("got set_style: {}".format(text))
@@ -223,10 +231,10 @@ def handle_set_style(chat_id, text):
 
         send_message(chat_id, "Current video style: {}".format(text))
     else:
-        send_message(chat_id, "unrecognized video style: " + text)
+        notify_user_unrecognized_cmd(chat_id, text, cmd_name)
 
 
-def handle_set_video_size(chat_id, text):
+def handle_set_video_size(chat_id, text, cmd_name):
     global video_sizes
 
     dump("got set_video_size: {}".format(text))
@@ -237,7 +245,7 @@ def handle_set_video_size(chat_id, text):
 
         send_message(chat_id, "Current video size: {}".format(text))
     else:
-        send_message(chat_id, "unrecognized video size: " + text)
+        notify_user_unrecognized_cmd(chat_id, text, cmd_name)
 
 
 def handle_doc(document, chat_id):
@@ -276,6 +284,14 @@ video_styles = {}
 # TODO: move this to config
 supported_sizes = ["256", "512", "1024"]
 video_sizes = {}
+
+help_user_txt = {
+    "/set_style": "Please pass one of this styles: {}; e.g. /set_style {}"
+        .format(", ".join(supported_styles), supported_styles[0]),
+
+    "/set_video_size": "Please pass one of this sizes: {}; e.g. /set_video_size {}"
+        .format(", ".join(supported_sizes), supported_sizes[0])
+}
 
 last_update_id = 0
 g_chat_id = 0
