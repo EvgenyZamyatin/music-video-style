@@ -26,29 +26,32 @@ model_pool = {
     prefix_path + 'data/models/cossacks': None,
 }
 
+print('NET INITIALIZATION')
+X_ = theano.shared(np.array([[[[]]]], dtype=floatX))
+NET_ = get_transformer_net(X_)
+FUN_ = theano.function([], NET_.output)
+print('DONE')
+
 
 class NeuralModel:
     def __init__(self, model_path, batch_size=1):
-        self.identity = False
-        if model_path is None:
-            self.identity = True
-            return
-        self.X = theano.shared(np.array([[[[]]]], dtype=floatX))
-        weights = model_path
-        transformer_net = get_transformer_net(self.X, weights)
-        Xtr = transformer_net.output
-        self.get_Xtr = theano.function([], Xtr)
+        #self.identity = False
+        #if model_path is None:
+        #    self.identity = True
+        #    return
+        self.weights = model_path
         self.batch_size = batch_size
 
     def magic(self, image_batch):
-        if self.identity:
-            return image_batch
+        #if self.identity:
+        #    return image_batch
         image_batch = np.concatenate([preprocess_img(i) for i in image_batch], axis=0)
         result = np.zeros_like(image_batch)
+        NET_.set_weights(self.weights)
         for i in range(0, len(image_batch), self.batch_size):
             batch = image_batch[i:i+self.batch_size]
-            self.X.set_value(batch)
-            output_batch = self.get_Xtr()
+            X_.set_value(batch)
+            output_batch = FUN_()
             result[i:i+len(batch)] = output_batch
         deprocessed = []
         for img in result:
@@ -63,7 +66,6 @@ class NeuralProcessor:
         model_paths = glob(model_collection_path + '/*')
         # models = [None] * (len(model_paths) + 1)
         # models[0] = NeuralModel(None)
-        print('%s INITIALIZATION' % model_collection_path)
         models = [None] * (len(model_paths))
         for model_path in model_paths:
             assert model_path.endswith('.h5')
@@ -73,7 +75,6 @@ class NeuralProcessor:
         if len(model_paths) == 0:
             print("model_paths is emtpy, check path to model")
 
-        print('DONE')
         self.models = models
 
     def process(self, images, audio_analyze):
