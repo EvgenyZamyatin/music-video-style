@@ -78,7 +78,7 @@ class NeuralProcessor:
 
         self.models = models
 
-    def process(self, images, audio_analyze):
+    def process(self, images, audio_analyze, callback=None):
         result = np.zeros_like(images)
         batches = [None] * len(self.models)
         n = len(self.models)
@@ -106,6 +106,7 @@ class NeuralProcessor:
                     result[j] = result_batch[t]
                 else:
                     result[j] += np.uint8(c[t] * result_batch[t])
+            callback((i+1)/len(batches) * 100)
         return result
 
 
@@ -113,16 +114,16 @@ for name in model_pool:
     model_pool[name] = NeuralProcessor(name)
 
 
-def process(frames_dir, audio_analyze, size, neural=False, colorize=False, brightify=False):
+def process(frames_dir, audio_analyze, size, neural=False, colorize=False, brightify=False, callback=None):
     if neural:
-        neural_process(frames_dir, audio_analyze, neural, size)
+        neural_process(frames_dir, audio_analyze, neural, size, callback)
     if colorize:
         color_process(frames_dir, audio_analyze, size)
     if brightify:
         bright_process(frames_dir, audio_analyze)
 
 
-def neural_process(frames_dir, audio_analyze, neural, size):
+def neural_process(frames_dir, audio_analyze, neural, size, callback=None):
     if neural not in model_pool:
         model_pool[neural] = NeuralProcessor(neural)
     neural_processor = model_pool[neural]
@@ -133,7 +134,7 @@ def neural_process(frames_dir, audio_analyze, neural, size):
     for frame_file in frame_files:
         images.append(load_and_resize(frame_file, size))
     images = np.array(images)
-    result = neural_processor.process(images, audio_analyze)
+    result = neural_processor.process(images, audio_analyze, callback)
     for img, file in zip(result, frame_files):
         imsave(file, img)
 

@@ -23,7 +23,7 @@ def create_args(video, output, neural=False, colorize=False, brightify=False, si
                               no_clean=no_clean)
 
 
-def main(args):
+def main(args, callback=None):
     uid = uuid.uuid1()
     dir_name = './.TEMP-' + str(uid)
     os.makedirs(dir_name)
@@ -36,7 +36,7 @@ def main(args):
     extract_frames(args.video, frames_dir)
     frames_count = len(glob(frames_dir + '/*'))
     audio_analyze = analyze(audio_file, frames_count)
-    process(frames_dir, audio_analyze, args.size, neural=args.neural, colorize=args.colorize, brightify=args.brightify)
+    process(frames_dir, audio_analyze, args.size, neural=args.neural, colorize=args.colorize, brightify=args.brightify, callback=callback)
     construct_video(frames_dir, audio_file, get_fps(args.video), args.output)
     if not args.no_clean:
         rmtree(dir_name)
