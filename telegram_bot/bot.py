@@ -136,12 +136,16 @@ def dump_users(*_):
         pickle.dump(existing_chats, u)
         pickle.dump(last_update_id, u)
         pickle.dump(g_chat_id, u)
+        pickle.dump(video_sizes)
+        pickle.dump(video_styles)
 
 
 def load_users(*_):
     global existing_chats
     global last_update_id
     global g_chat_id
+    global video_sizes
+    global video_styles
 
     dump("load_users")
     try:
@@ -149,6 +153,8 @@ def load_users(*_):
             existing_chats = pickle.load(u)
             last_update_id = pickle.load(u)
             g_chat_id = pickle.load(u)
+            video_sizes = pickle.load(u)
+            video_styles = pickle.load(u)
 
             dump(existing_chats)
     except Exception as e:
@@ -195,16 +201,43 @@ current_style = 'wave'
 
 
 def handle_text(text, chat_id):
-    global current_style
     if text in commands:
         dump("command, chat_id: {} {}".format(text, chat_id))
         commands[text](chat_id)
-    if text == 'wave':
-        current_style = 'wave'
-    elif text == 'stained-glass':
-        current_style = 'stained-glass'
-    elif text == 'flames':
-        current_style = 'flames'
+    else:
+        for pref_cmd, fun_cmd in prefix_commands.items():
+            n = len(pref_cmd)
+            if pref_cmd == text[:n]:
+                fun_cmd(g_chat_id, text[n + 1:])
+                break
+
+
+def handle_set_style(chat_id, text):
+    global video_styles
+
+    dump("got set_style: {}".format(text))
+
+    text = text.strip()
+    if text in supported_styles:
+        video_styles[chat_id] = text
+
+        send_message(chat_id, "Current video style: {}".format(text))
+    else:
+        send_message(chat_id, "unrecognized video style: " + text)
+
+
+def handle_set_video_size(chat_id, text):
+    global video_sizes
+
+    dump("got set_video_size: {}".format(text))
+
+    text = text.strip()
+    if text in supported_sizes:
+        video_sizes[chat_id] = text
+
+        send_message(chat_id, "Current video size: {}".format(text))
+    else:
+        send_message(chat_id, "unrecognized video size: " + text)
 
 
 def handle_doc(document, chat_id):
@@ -216,9 +249,12 @@ def handle_doc(document, chat_id):
         base_name, extension = os.path.splitext(res_path)
         output_path = base_name + "_out" + extension
 
+        video_style = video_styles.get(chat_id, supported_styles[0])
+        video_size = video_sizes.get(chat_id, supported_sizes[0])
+
         args = ["--video=" + res_path,
-                "--neural=" + "data/models/" + current_style,
-                "--size=1024",
+                "--neural=" + "data/models/" + video_style,
+                "--size=" + video_size,
                 "--output=" + output_path]
 
         dump("make_style")
@@ -232,15 +268,27 @@ def handle_doc(document, chat_id):
 
 proceed = True
 existing_chats = set()
+
+# TODO: move this to config
+supported_styles = ["wave", "stained-glass", "flames"]
+video_styles = {}
+
+# TODO: move this to config
+supported_sizes = ["256", "512", "1024"]
+video_sizes = {}
+
 last_update_id = 0
 g_chat_id = 0
-g_motivation_num = 0
 last_dumped_time = datetime.datetime.now()
 
 commands = {"/start": start_cmd,
             "/stop": stop_cmd,
             "/shut_down": shut_down
             }
+
+prefix_commands = {"/set_style": handle_set_style,
+                   "/set_video_size": handle_set_video_size
+                   }
 
 attributes_for_request = {"text": handle_text,
                           "document": handle_doc,
