@@ -11,10 +11,14 @@ import sys
 import urllib.request
 import os
 
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main import main_with_list_args as make_style
-# def make_style(*_):
-#     pass
+# def make_style(args, callback):
+#     for i in range(100):
+#         callback(i)
+#         time.sleep(0.5)
+
 
 URL_TELEGRAM = "https://api.telegram.org/"
 URL_TELEGRAM_BOT = URL_TELEGRAM + "bot"
@@ -70,13 +74,13 @@ def get_file(chat_id, file_id):
             res_path = DOWNLOAD_PATH + str(chat_id) + video_extension
 
             dump("start downloading video from url: {}; to: {}".format(url_for_download_video, res_path))
-            message_id = send_message(chat_id, "start downloading video: 10%")
+            message_id = send_message(chat_id, "start downloading video")
 
             urllib.request.urlretrieve(url_for_download_video, res_path)
 
             dump("download completed")
-            message_id = edit_message(chat_id, message_id, "the download completed: 30%")
-            message_id = edit_message(chat_id, message_id, "start creating stylish video: 35%")
+            message_id = edit_message(chat_id, message_id, "the download completed")
+            message_id = edit_message(chat_id, message_id, "Creating stylish video: 0% completed")
 
             return res_path, message_id
 
@@ -125,10 +129,12 @@ def edit_message(chat_id, message_id, new_text):
     response = requests.post(edit_message_url, json=payload)
     json_response = json.loads(response.text)
 
+    dump("{}".format(json_response))
+
     if "error_code" in json_response:
         dump("error SEND: {}".format(response.text))
 
-        return -1
+        return message_id # because edit message return Bad request if message not modified
     else:
         dump("SEND: {}".format(response.text))
 
@@ -321,6 +327,15 @@ def handle_set_video_size(chat_id, text, cmd_name):
         notify_user_unrecognized_cmd(chat_id, text, cmd_name)
 
 
+def update_during_stylish(chat_id, message_id):
+    def callback(percentage):
+        nonlocal message_id
+        nonlocal chat_id
+
+        message_id = edit_message(chat_id, message_id, "Creating stylish video: " + str(int(percentage)) + "% completed")
+
+    return callback
+
 def handle_doc(document, chat_id):
     dump("get doc: {}".format(document))
 
@@ -344,14 +359,14 @@ def handle_doc(document, chat_id):
 
         dump("make_style")
         dump("args: {}".format(args))
-        make_style(args)
+        make_style(args, update_during_stylish(chat_id, message_id))
 
-        message_id = edit_message(chat_id, message_id, "stylish video was created: 70%")
+        message_id = edit_message(chat_id, message_id, "stylish video was created")
         dump("stylish video was created")
 
         send_video(chat_id, output_path)
 
-        message_id = edit_message(chat_id, message_id, "Work done: 100%")
+        message_id = edit_message(chat_id, message_id, "Work done")
 
 
 def handle_message(msg):
