@@ -61,6 +61,10 @@ class NeuralProcessor:
             assert model_path.endswith('.h5')
             n = int(os.path.basename(model_path)[:-3])
             models[n] = NeuralModel(model_path)
+
+        if len(model_paths) == 0:
+            print("model_paths is emtpy, check path to model")
+
         print('DONE')
         self.models = models
 

@@ -260,8 +260,12 @@ def handle_doc(document, chat_id):
         video_style = video_styles.get(chat_id, supported_styles[0])
         video_size = video_sizes.get(chat_id, supported_sizes[0])
 
+        path_to_model = "data/models/"
+        if "nemchenko" in os.getcwd():
+            path_to_model = "/home/evgeny/music-video-style/data/models/"
+
         args = ["--video=" + res_path,
-                "--neural=" + "data/models/" + video_style,
+                "--neural=" + path_to_model + video_style,
                 "--size=" + video_size,
                 "--output=" + output_path]
 
