@@ -27,6 +27,7 @@ model_pool = {
 }
 
 print('NET INITIALIZATION')
+print('MULTITHREADING NOT SUPPORTED!!!!')
 X_ = theano.shared(np.array([[[[]]]], dtype=floatX))
 NET_ = get_transformer_net(X_)
 FUN_ = theano.function([], NET_.output)
